@@ -16,7 +16,7 @@ username = get_username()
 
 # seconds to wait between uploads
 # otherwise api rate-limiting fault
-sleep_length = 15
+sleep_length = 75
 
 client = ImgurClient(client_id, client_secret, access_token, refresh_token)
 
