@@ -67,7 +67,7 @@ try:
         shutil.move(image, "./finished_uploads/")
         curr_credits = ImgurClient.get_credits(client)
         print(curr_credits)
-        time.sleep(1)
+        time.sleep(8)
 
 except ImgurClientError as e:
     print(e.error_message)
