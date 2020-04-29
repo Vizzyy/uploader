@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 import shutil
+import time
 from datetime import datetime
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
@@ -50,6 +51,7 @@ try:
 
     # glob files in directory
     fullList = glob.glob('*.jpg')
+    list.sort(fullList)
     print(f"There are {len(fullList)} images to parse.")
 
     # while credits available, upload each file to album
@@ -60,9 +62,12 @@ try:
             break
         print(f"Attempting to upload {image} ...")
         response = client.upload_from_path(image, image_config, False)
-        print(response)
+        # print(response)
         print("Now moving file...")
         shutil.move(image, "./finished_uploads/")
+        curr_credits = ImgurClient.get_credits(client)
+        print(curr_credits)
+        time.sleep(1)
 
 except ImgurClientError as e:
     print(e.error_message)
