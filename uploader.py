@@ -14,6 +14,10 @@ access_token = get_access_token()
 refresh_token = get_refresh_token()
 username = get_username()
 
+# seconds to wait between uploads
+# otherwise api rate-limiting fault
+sleep_length = 15
+
 client = ImgurClient(client_id, client_secret, access_token, refresh_token)
 
 today = str(datetime.date(datetime.now()))
@@ -57,20 +61,22 @@ try:
     # while credits available, upload each file to album
     image_config = {'album': album_id}
     for image in fullList:
-        if curr_credits['UserRemaining'] < 10 or curr_credits['ClientRemaining'] < 100:
-            print("Reached API limit!")
-            break
-        print(f"Attempting to upload {image} ...")
+        now = datetime.now()
+        print(f"{now} - Attempting to upload {image} ...")
         response = client.upload_from_path(image, image_config, False)
-        # print(response)
+        print(response)
         print("Now moving file...")
         shutil.move(image, "./finished_uploads/")
-        curr_credits = ImgurClient.get_credits(client)
-        print(curr_credits)
-        time.sleep(8)
+        time.sleep(sleep_length)
+
+    curr_credits = ImgurClient.get_credits(client)
+    print(curr_credits)
 
 except ImgurClientError as e:
     print(e.error_message)
     print(e.status_code)
+except Exception as e:
+    print(e)
 
-print("Script finished.")
+now = datetime.now()
+print(f"{now} - Script finished.")
