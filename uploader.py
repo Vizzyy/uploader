@@ -40,8 +40,8 @@ try:
     today_album_exists = False
     album_id = ""
     for item in response:
-        #print(f"{item.title} - {item.id}")
         if item.title == today:
+            print(f"Found album: {item.title} - {item.id}")
             today_album_exists = True
             album_id = item.id
             break
@@ -69,14 +69,14 @@ try:
         shutil.move(image, "./finished_uploads/")
         time.sleep(sleep_length)
 
-    curr_credits = ImgurClient.get_credits(client)
-    print(curr_credits)
-
 except ImgurClientError as e:
+    print(ImgurClient.get_credits(client))
     print(e.error_message)
     print(e.status_code)
 except Exception as e:
+    print(ImgurClient.get_credits(client))
     print(e)
 
+print(ImgurClient.get_credits(client))
 now = datetime.now()
 print(f"{now} - Script finished.")
