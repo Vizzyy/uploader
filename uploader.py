@@ -36,7 +36,7 @@ try:
     today_album_exists = False
     album_id = ""
     for item in response:
-        print(f"{item.title} - {item.id}")
+        #print(f"{item.title} - {item.id}")
         if item.title == today:
             today_album_exists = True
             album_id = item.id
