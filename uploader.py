@@ -70,11 +70,9 @@ try:
         time.sleep(sleep_length)
 
 except ImgurClientError as e:
-    print(ImgurClient.get_credits(client))
     print(e.error_message)
     print(e.status_code)
 except Exception as e:
-    print(ImgurClient.get_credits(client))
     print(e)
 
 print(ImgurClient.get_credits(client))
