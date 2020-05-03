@@ -1,3 +1,5 @@
+import requests
+
 import sys
 from datetime import datetime
 from imgurpython import ImgurClient
@@ -8,12 +10,8 @@ client = ImgurClient(get_client_id(), get_client_secret(), get_access_token(), g
 now = datetime.now()
 print(f"{now} - Script started.")
 
-# CLI Args
-# 1 source album id
-# 2 destination album name
 try:
     source_album_id = sys.argv[1]
-    dest_album_title = sys.argv[2]
     images = client.get_album_images(source_album_id)
     sorted_images = sorted(images, key=lambda x: x.datetime, reverse=False)
     ids = []
@@ -24,14 +22,16 @@ try:
     formatted_id = str(ids.__str__()).replace("[", "").replace("]", "").replace(" ", "").replace("'", "")
 
     album_config = {
-        'title': dest_album_title,
-        'privacy': 'hidden',
         'ids': formatted_id
     }
 
     print(album_config)
-    response = client.create_album(album_config)
-    print(response)
+
+    url = "https://api.imgur.com/3/album/"+source_album_id
+
+    response = requests.request("POST", url, headers=client.prepare_headers(), data=album_config)
+
+    print(response.text.encode('utf8'))
 
 except ImgurClientError as e:
     print(e.error_message)
