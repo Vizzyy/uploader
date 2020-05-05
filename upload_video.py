@@ -2,7 +2,8 @@ import time
 import requests
 
 
-def convert_to_gif(local_filename):
+def convert_to_gif(local_filename: str) -> str:
+    """ Using public gfycat API, convert incoming .mov or .mp4 into .gif format """
     try:
         # local_filename = "IMG_0012.MOV"  # sys.argv[1]
 
