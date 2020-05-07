@@ -27,7 +27,7 @@ def convert_to_gif(local_filename: str) -> str:
         # GET https://api.gfycat.com/v1/gfycats/fetch/status/gfyname
         # {'task': 'complete', 'gfyname': 'gfyname'}
         gif_link = ""
-        while True:
+        for i in range(60):
             response_status = requests.get(f"https://api.gfycat.com/v1/gfycats/fetch/status/{gfyname}")
             print(response_status.json())
             upload_status = response_status.json()['task']
