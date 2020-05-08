@@ -29,16 +29,21 @@ def convert_to_gif(local_filename: str) -> str:
         gif_link = ""
         for i in range(60):
             response_status = requests.get(f"https://api.gfycat.com/v1/gfycats/fetch/status/{gfyname}")
-            print(response_status.json())
-            upload_status = response_status.json()['task']
-            if upload_status == "complete":
+            result_json = response_status.json()
+            print(f"Polling result: {result_json}")
+            if 'gfyName' in result_json and result_json['gfyName'] != gfyname:
+                print(f"Found existing match for video... {result_json['gfyName']}")
+                gfyname = result_json['gfyName']
+                break
+            if 'task' in result_json and result_json['task'] == "complete":
+                print("Encoding complete!")
                 break
             time.sleep(5)
 
         # /v1/me/gfycats/{gfyId}/published	PUT	Update/replace the gfycat published. Params: 'value’, Values: '0’,'1’
 
-        print("Downloading GIF...")
         uri = f'https://thumbs.gfycat.com/{gfyname}-size_restricted.gif'
+        print(f"Downloading GIF {uri} ...")
         with open(f'{local_filename[:-4]}.gif', 'wb') as f:
             f.write(requests.get(uri).content)
             print("Finished download!")
