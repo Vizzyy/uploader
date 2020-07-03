@@ -1,28 +1,59 @@
+import base64
 from wcmatch import glob
 import os
-import sys
 import shutil
 from datetime import datetime
 from imgurpython import ImgurClient
-from imgurpython.helpers.error import ImgurClientError
+from imgurpython.helpers.error import ImgurClientError, ImgurClientRateLimitError
 from config import *
 from upload_video import *
 
 # seconds to wait between uploads
 # otherwise api rate-limiting fault
-sleep_length = 75
+sleep_length = SLEEP_LENGTH
 now = datetime.now()
 print(f"{now} - Script started.\n")
 client = ImgurClient(get_client_id(), get_client_secret(), get_access_token(), get_refresh_token())
-
 today = str(datetime.date(now))
 
-# check credit limit, if none exit
-curr_credits = ImgurClient.get_credits(client)
-print(curr_credits)
-if curr_credits['UserRemaining'] < 10 or curr_credits['ClientRemaining'] < 100:
-    print("API LIMIT REACHED")
-    sys.exit()
+
+def upload_to_imgur(image_path, album_id):
+
+    fd = open(image_path, 'rb')
+    contents = fd.read()
+    b64 = base64.b64encode(contents)
+    data = {
+        'image': b64,
+        'type': 'base64',
+        'album': album_id
+    }
+    fd.close()
+
+    url = "https://imgur-apiv3.p.rapidapi.com/3/image"
+    headers = client.prepare_headers()  # Set Auth Bearer header
+    headers['x-rapidapi-host'] = RAPID_API_HOST
+    headers['x-rapidapi-key'] = RAPID_API_KEY
+    headers['content-type'] = "application/x-www-form-urlencoded"
+
+    response = requests.request("POST", url, data=data, headers=headers)
+
+    print(response.text)
+
+    # Rate-limit check
+    if response.status_code == 429:
+        raise ImgurClientRateLimitError()
+
+    try:
+        response_data = response.json()
+    except Exception as e:
+        print(e)
+        raise ImgurClientError('JSON decoding of response failed.')
+
+    if 'data' in response_data and isinstance(response_data['data'], dict) and 'error' in response_data['data']:
+        raise ImgurClientError(response_data['data']['error'], response.status_code)
+
+    return response_data['data'] if 'data' in response_data else response_data
+
 
 # check if finished folder exists
 if not os.path.exists('finished_uploads'):
@@ -69,7 +100,8 @@ for image in full_list:
         else:
             final_path = image
 
-        response = client.upload_from_path(final_path, image_config, False)
+        # response = client.upload_from_path(final_path, image_config, False)
+        response = upload_to_imgur(final_path, album_id)
         print(response)
         print("Now moving file...")
         shutil.move(final_path, "./finished_uploads/")
